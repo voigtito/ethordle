@@ -96,19 +96,16 @@ const App = () => {
     }
     else
     {
-      row.forEach(function (letter, i) {    
+
+      for (const [i, letter] of row.entries()) {
         if (letter.value == solution.charAt(i)) {
           letter.status = "correct";    
           
           var keyboardLetter = getKeyboardLetter(newKeyboard, letter.value);            
           keyboardLetter.status = "correct";
-        }
-      });
-
-      row.forEach(function (letter, i) {
-        if (letter.status == "correct") {
-          return;
-        }
+          keyboardLetter.sequence = `${"sequence" + i}`;
+          continue
+        }          
 
         var matchesSoFar = row.filter(item => item.value == letter.value && (item.status == "correct" || item.status == "incorrect-position")).length;
         var matchesInSolution = solution.split('').filter(x => x == letter.value).length;
@@ -119,11 +116,15 @@ const App = () => {
         {
           var keyboardLetter = getKeyboardLetter(newKeyboard, letter.value);     
           keyboardLetter.status = letter.status;
+          if (!keyboardLetter.sequence) {
+            keyboardLetter.sequence = `sequence${i}`;
+          }
         }
-      });
+      }
 
-      if (currentRowIndex >= maxGuesses - 1 || guess == solution)
+      if (currentRowIndex >= maxGuesses - 1 || guess == solution){
         setGameStatus("finished");
+      }
 
       setCurrentRowIndex(currentRowIndex + 1);
       setCurrentSquareIndex(0);
@@ -199,7 +200,12 @@ const Keyboard = ({ keyboard, handleKeyDown }) => {
         <div className="keyboard-row" key={rowIndex} row={rowIndex}>
         { 
           row.map((letter, letterIndex) => ( 
-            <div className={`keyboard-letter no-select ${letter.status}`} key={letterIndex} onClick={() => handleClick(letter.value)}>{letter.value}</div>     
+            <div 
+              className={`keyboard-letter no-select ${letter.status} ${letter.status ? letter.sequence : null}`} 
+              key={letterIndex} 
+              onClick={() => handleClick(letter.value)}>
+                {letter.value}
+            </div>     
           ))
         }   
       </div>
